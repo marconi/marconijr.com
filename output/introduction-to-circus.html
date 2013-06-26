@@ -48,9 +48,9 @@
 		</h1>
 		<p>Whilst the most common way in deploying Python WSGI apps is still via <a href="http://gunicorn.org/">Gunicorn</a>, now adays I prefer using <a href="http://circus.readthedocs.org">Circus</a> + <a href="http://chaussette.readthedocs.org">Chaussette</a>. The main difference is that, unlike before where you have Gunicorn serving your app and manages your worker processes, Circus on the other hand does all the process and socket management so Chaussette, your WSGI server, does only one thing and that's to serve your app.</p>
 <p>You can even run something like Redis inside Circus and let Circus manage it. This should feel familiar if you've used something like <a href="http://supervisord.org/">Supervisor</a> before as it has an overlapping functionality with Circus.</p>
-<p>Alright, enough talk and lets see some code. To start, we're going to server a simple WSGI app in Circus:</p>
+<p>Alright, enough talk and lets see some code. To start, we're going to serve a simple WSGI app in Circus:</p>
 <div class="codehilite"><pre><span class="k">def</span> <span class="nf">app</span><span class="p">(</span><span class="n">environ</span><span class="p">,</span> <span class="n">start_response</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Simplest possible application object&quot;&quot;&quot;</span>
+    <span class="sd">&quot;&quot;&quot; Simplest wsgi application. &quot;&quot;&quot;</span>
     <span class="n">data</span> <span class="o">=</span> <span class="s">&#39;Hello, World!</span><span class="se">\n</span><span class="s">&#39;</span>
     <span class="n">status</span> <span class="o">=</span> <span class="s">&#39;200 OK&#39;</span>
     <span class="n">response_headers</span> <span class="o">=</span> <span class="p">[</span>
@@ -62,7 +62,7 @@
 </pre></div>
 
 
-<p>Our app is very simple, it just outputs the string <code>Hello World</code>. Save it as <code>app.py</code> and next, our <code>circus.ini</code> file:</p>
+<p>Our app is very simple, it just outputs the string <code>Hello World</code>. Save it as <code>wsgi.py</code> and next, our <code>circus.ini</code> file:</p>
 <div class="codehilite"><pre><span class="k">[circus]</span>
 <span class="na">check_delay</span> <span class="o">=</span> <span class="s">5</span>
 <span class="na">endpoint</span> <span class="o">=</span> <span class="s">tcp://127.0.0.1:5555</span>
@@ -84,7 +84,7 @@
 <p>Lets focus on the watcher section, you can lookup what the other config does on the <a href="http://circus.readthedocs.org/en/0.8.1/configuration/">configuration</a> docs. What the watcher <code>myworker</code> does is spawn Chaussette processes and run it over the file descriptor defined on the socket section below. Chaussette supports different kinds of backend, here we're using gevent.</p>
 <p>We're also telling our worker to only spawn 2 chaussette processes via <code>numprocesses</code> config. The <code>use_sockets</code> is what actually allows this worker to use the socket defined below since parent descriptors are closed by default when the child processes (Chaussette) is forked.</p>
 <p>If we don't use file descriptor, since we have two workers they will both try to bind on the default host:port of chaussette and the first one will be able to but the second one will throw an error since the port is already taken by the first worker. With file descriptors, they are inherited when forking, hence the file descriptor is shared between worker.</p>
-<p>Once circus is running, we can control our worker via <code>circusctl</code> command. <code>circusctl status</code> will show your worker's status, you can also restart using <code>circusctl restart myworker</code> these should be pretty much familiar as its quite similar to other control commands. And if you're using <a href="https://salt.readthedocs.org/en/latest/">SaltStack</a>, you might be interested on the SaltStack module I <a href="https://github.com/saltstack/salt-contrib/blob/master/modules/circus.py">wrote</a>.</p>
+<p>Then lets run circus by issuing the command <code>circusd circus.ini</code> and once circus is running, we can control our worker via <code>circusctl</code> command. <code>circusctl status</code> will show your worker's status, you can also restart using <code>circusctl restart myworker</code> these should be pretty much familiar as its quite similar to other control commands. And if you're using <a href="https://salt.readthedocs.org/en/latest/">SaltStack</a>, you might be interested on the SaltStack module I <a href="https://github.com/saltstack/salt-contrib/blob/master/modules/circus.py">wrote</a>.</p>
 <p>That's it, we've used a basic WSGI app here but as you can imagine we can just as easily use the same for Django, Pyramid or any other Python web framework that has a wsgi app. Just replace <code>wsgi.app</code> to the relative path where your wsgi app is located.</p>
 
 		<div id="article_meta">
