@@ -2,7 +2,16 @@
 <feed xmlns="http://www.w3.org/2005/Atom"><title>marconijr</title><link href="http://marconijr.com/" rel="alternate"></link><link href="http://marconijr.com/feeds/all-en.atom.xml" rel="self"></link><id>http://marconijr.com/</id><updated>2013-06-26T08:13:00+08:00</updated><entry><title>Introduction to Circus</title><link href="http://marconijr.com/introduction-to-circus.html" rel="alternate"></link><updated>2013-06-26T08:13:00+08:00</updated><author><name>Marconi Moreto</name></author><id>tag:marconijr.com,2013-06-26:introduction-to-circus.html</id><summary type="html">&lt;p&gt;Whilst the most common way in deploying Python WSGI apps is still via &lt;a href="http://gunicorn.org/"&gt;Gunicorn&lt;/a&gt;, now adays I prefer using &lt;a href="http://circus.readthedocs.org"&gt;Circus&lt;/a&gt; + &lt;a href="http://chaussette.readthedocs.org"&gt;Chaussette&lt;/a&gt;. The main difference is that, unlike before where you have Gunicorn serving your app and manages your worker processes, Circus on the other hand does all the process and socket management so Chaussette, your WSGI server, does only one thing and that's to serve your app.&lt;/p&gt;
 &lt;p&gt;You can even run something like Redis inside Circus and let Circus manage it. This should feel familiar if you've used something like &lt;a href="http://supervisord.org/"&gt;Supervisor&lt;/a&gt; before as it has an overlapping functionality with Circus.&lt;/p&gt;
 &lt;p&gt;Alright, enough talk and lets see some code. To start, we're going to serve a simple WSGI app in Circus:&lt;/p&gt;
-&lt;div class="codehilite"&gt;&lt;pre&gt;&lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;app&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;environ&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;start_response&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
+&lt;table class="codehilitetable"&gt;&lt;tr&gt;&lt;td class="linenos"&gt;&lt;div class="linenodiv"&gt;&lt;pre&gt; 1
+ 2
+ 3
+ 4
+ 5
+ 6
+ 7
+ 8
+ 9
+10&lt;/pre&gt;&lt;/div&gt;&lt;/td&gt;&lt;td class="code"&gt;&lt;div class="codehilite"&gt;&lt;pre&gt;&lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;app&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;environ&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;start_response&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
     &lt;span class="sd"&gt;&amp;quot;&amp;quot;&amp;quot; Simplest wsgi application. &amp;quot;&amp;quot;&amp;quot;&lt;/span&gt;
     &lt;span class="n"&gt;data&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="s"&gt;&amp;#39;Hello, World!&lt;/span&gt;&lt;span class="se"&gt;\n&lt;/span&gt;&lt;span class="s"&gt;&amp;#39;&lt;/span&gt;
     &lt;span class="n"&gt;status&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="s"&gt;&amp;#39;200 OK&amp;#39;&lt;/span&gt;
@@ -13,10 +22,24 @@
     &lt;span class="n"&gt;start_response&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;status&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;response_headers&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
     &lt;span class="k"&gt;return&lt;/span&gt; &lt;span class="nb"&gt;iter&lt;/span&gt;&lt;span class="p"&gt;([&lt;/span&gt;&lt;span class="n"&gt;data&lt;/span&gt;&lt;span class="p"&gt;])&lt;/span&gt;
 &lt;/pre&gt;&lt;/div&gt;
-
+&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 
 &lt;p&gt;Our app is very simple, it just outputs the string &lt;code&gt;Hello World&lt;/code&gt;. Save it as &lt;code&gt;wsgi.py&lt;/code&gt; and next, our &lt;code&gt;circus.ini&lt;/code&gt; file:&lt;/p&gt;
-&lt;div class="codehilite"&gt;&lt;pre&gt;&lt;span class="k"&gt;[circus]&lt;/span&gt;
+&lt;table class="codehilitetable"&gt;&lt;tr&gt;&lt;td class="linenos"&gt;&lt;div class="linenodiv"&gt;&lt;pre&gt; 1
+ 2
+ 3
+ 4
+ 5
+ 6
+ 7
+ 8
+ 9
+10
+11
+12
+13
+14
+15&lt;/pre&gt;&lt;/div&gt;&lt;/td&gt;&lt;td class="code"&gt;&lt;div class="codehilite"&gt;&lt;pre&gt;&lt;span class="k"&gt;[circus]&lt;/span&gt;
 &lt;span class="na"&gt;check_delay&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="s"&gt;5&lt;/span&gt;
 &lt;span class="na"&gt;endpoint&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="s"&gt;tcp://127.0.0.1:5555&lt;/span&gt;
 &lt;span class="na"&gt;pubsub_endpoint&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="s"&gt;tcp://127.0.0.1:5556&lt;/span&gt;
@@ -32,7 +55,7 @@
 &lt;span class="na"&gt;host&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="s"&gt;127.0.0.1&lt;/span&gt;
 &lt;span class="na"&gt;port&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="s"&gt;8000&lt;/span&gt;
 &lt;/pre&gt;&lt;/div&gt;
-
+&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 
 &lt;p&gt;Lets focus on the watcher section, you can lookup what the other config does on the &lt;a href="http://circus.readthedocs.org/en/0.8.1/configuration/"&gt;configuration&lt;/a&gt; docs. What the watcher &lt;code&gt;myworker&lt;/code&gt; does is spawn Chaussette processes and run it over the file descriptor defined on the socket section below. Chaussette supports different kinds of backend, here we're using gevent.&lt;/p&gt;
 &lt;p&gt;We're also telling our worker to only spawn 2 chaussette processes via &lt;code&gt;numprocesses&lt;/code&gt; config. The &lt;code&gt;use_sockets&lt;/code&gt; is what actually allows this worker to use the socket defined below since parent descriptors are closed by default when the child processes (Chaussette) is forked.&lt;/p&gt;

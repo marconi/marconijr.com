@@ -49,7 +49,16 @@
 		<p>Whilst the most common way in deploying Python WSGI apps is still via <a href="http://gunicorn.org/">Gunicorn</a>, now adays I prefer using <a href="http://circus.readthedocs.org">Circus</a> + <a href="http://chaussette.readthedocs.org">Chaussette</a>. The main difference is that, unlike before where you have Gunicorn serving your app and manages your worker processes, Circus on the other hand does all the process and socket management so Chaussette, your WSGI server, does only one thing and that's to serve your app.</p>
 <p>You can even run something like Redis inside Circus and let Circus manage it. This should feel familiar if you've used something like <a href="http://supervisord.org/">Supervisor</a> before as it has an overlapping functionality with Circus.</p>
 <p>Alright, enough talk and lets see some code. To start, we're going to serve a simple WSGI app in Circus:</p>
-<div class="codehilite"><pre><span class="k">def</span> <span class="nf">app</span><span class="p">(</span><span class="n">environ</span><span class="p">,</span> <span class="n">start_response</span><span class="p">):</span>
+<table class="codehilitetable"><tr><td class="linenos"><div class="linenodiv"><pre> 1
+ 2
+ 3
+ 4
+ 5
+ 6
+ 7
+ 8
+ 9
+10</pre></div></td><td class="code"><div class="codehilite"><pre><span class="k">def</span> <span class="nf">app</span><span class="p">(</span><span class="n">environ</span><span class="p">,</span> <span class="n">start_response</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot; Simplest wsgi application. &quot;&quot;&quot;</span>
     <span class="n">data</span> <span class="o">=</span> <span class="s">&#39;Hello, World!</span><span class="se">\n</span><span class="s">&#39;</span>
     <span class="n">status</span> <span class="o">=</span> <span class="s">&#39;200 OK&#39;</span>
@@ -60,10 +69,24 @@
     <span class="n">start_response</span><span class="p">(</span><span class="n">status</span><span class="p">,</span> <span class="n">response_headers</span><span class="p">)</span>
     <span class="k">return</span> <span class="nb">iter</span><span class="p">([</span><span class="n">data</span><span class="p">])</span>
 </pre></div>
-
+</td></tr></table>
 
 <p>Our app is very simple, it just outputs the string <code>Hello World</code>. Save it as <code>wsgi.py</code> and next, our <code>circus.ini</code> file:</p>
-<div class="codehilite"><pre><span class="k">[circus]</span>
+<table class="codehilitetable"><tr><td class="linenos"><div class="linenodiv"><pre> 1
+ 2
+ 3
+ 4
+ 5
+ 6
+ 7
+ 8
+ 9
+10
+11
+12
+13
+14
+15</pre></div></td><td class="code"><div class="codehilite"><pre><span class="k">[circus]</span>
 <span class="na">check_delay</span> <span class="o">=</span> <span class="s">5</span>
 <span class="na">endpoint</span> <span class="o">=</span> <span class="s">tcp://127.0.0.1:5555</span>
 <span class="na">pubsub_endpoint</span> <span class="o">=</span> <span class="s">tcp://127.0.0.1:5556</span>
@@ -79,7 +102,7 @@
 <span class="na">host</span> <span class="o">=</span> <span class="s">127.0.0.1</span>
 <span class="na">port</span> <span class="o">=</span> <span class="s">8000</span>
 </pre></div>
-
+</td></tr></table>
 
 <p>Lets focus on the watcher section, you can lookup what the other config does on the <a href="http://circus.readthedocs.org/en/0.8.1/configuration/">configuration</a> docs. What the watcher <code>myworker</code> does is spawn Chaussette processes and run it over the file descriptor defined on the socket section below. Chaussette supports different kinds of backend, here we're using gevent.</p>
 <p>We're also telling our worker to only spawn 2 chaussette processes via <code>numprocesses</code> config. The <code>use_sockets</code> is what actually allows this worker to use the socket defined below since parent descriptors are closed by default when the child processes (Chaussette) is forked.</p>
@@ -97,30 +120,8 @@
 		<a href="./" class="button_accent">&larr;&nbsp;&nbsp;&nbsp;Back to blog</a>
 	</footer>
 
-		<div id="comments">
-		<h2>Comments</h2>
-		<div id="disqus_thread"></div>
-		<script type="text/javascript">
-			var disqus_identifier = "introduction-to-circus.html";
-			(function() {
-				var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
-				dsq.src = 'http://marconijr.disqus.com/embed.js';
-				(document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
-			})();
-		</script>
-		<noscript>Please enable JavaScript to view <a href="http://disqus.com/?ref_noscript">comments</a>.</noscript>
-	</div>
 	
 	</section>
 
-	<script type="text/javascript">
-	var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
-	document.write(unescape("%3Cscript src='" + gaJsHost + "google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E"));
-	</script>
-	<script type="text/javascript">
-		try {
-			var pageTracker = _gat._getTracker("UA-12288188-1");
-			pageTracker._trackPageview();
-		} catch(err) {}</script>
-</body>
+	</body>
 </html>

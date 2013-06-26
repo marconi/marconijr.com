@@ -20,4 +20,4 @@ LINKS = (('@marconimjr', 'https://twitter.com/marconimjr'),
 DEFAULT_PAGINATION = False
 THEME = 'themes/pelican-svbtle'
 MARKUP = ('md',)
-MD_EXTENSIONS = ['codehilite', 'extra']
+MD_EXTENSIONS = ['codehilite(linenums=True)', 'extra']
