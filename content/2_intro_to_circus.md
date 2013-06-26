@@ -3,7 +3,7 @@ Date: 2013-06-26 08:13
 Slug: introduction-to-circus
 Category: Python
 Author: Marconi Moreto
-Summary: A quick introduction to Circus: The process and socket manager
+Summary: A quick introduction to Circus: The process and socket manager.
 
 Whilst the most common way in deploying Python WSGI apps is still via [Gunicorn](http://gunicorn.org/), now adays I prefer using [Circus](http://circus.readthedocs.org) + [Chaussette](http://chaussette.readthedocs.org). The main difference is that, unlike before where you have Gunicorn serving your app and manages your worker processes, Circus on the other hand does all the process and socket management so Chaussette, your WSGI server, does only one thing and that's to serve your app.
 
