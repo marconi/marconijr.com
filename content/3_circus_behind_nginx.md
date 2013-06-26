@@ -65,4 +65,4 @@ This is a basic config which just proxies all incoming request to our wsgi app. 
     $ curl http://localhost
     Hello, World!
 
-only this time our request was sent to Nginx and passed down to Circus.
+only this time our request was sent to Nginx and passed down to Circus, you can download the updated app [here](https://dl.dropboxusercontent.com/u/829808/app.tar.gz) and that's it!
