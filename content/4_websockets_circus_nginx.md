@@ -19,12 +19,27 @@ And then there's [Node](http://nodejs.org/), the Javascript framework from where
 
 For this post we will concentrate on gevent-socketio, and then Node soon. In the gevent-socketio github repo, there's an example project called [simple_pyramid_chat](https://github.com/abourget/gevent-socketio/tree/master/examples/simple_pyramid_chat) we will be using it instead of building our own from ground up.
 
-First thing is first, lets install all the required dependencies:
+First thing is first, lets install all the required dependencies but this time we're going to use [virtualenv](http://www.virtualenv.org/en/latest/) and [virtualenvwrapper](https://bitbucket.org/dhellmann/virtualenvwrapper):
+
+    pip install -U virtualenv virtualenvwrapper
+
+virtualenv is a tool that lets you create a sandbox environment for your Python application so it doesn't messed up your system wide installation, and virtualenvwrapper is just a bunch of shell commands that wraps around virtualenv commands and offer more abstraction.
+
+once installed, we need a bit of configuration for those two. Add the following lines to your `.profile` or `.zshrc` if you're using [zshell](https://github.com/robbyrussell/oh-my-zsh):
+
+    export WORKON_HOME=~/Envs
+    source /usr/local/bin/virtualenvwrapper.sh
+
+you need to make sure that $WORKON_HOME exists:
+
+    mkdir ~/Envs
+
+and then reload your terminal by running `. ~/.profile` or `. ~/.zshrc`, and then finally create the virtualenv and install the dependencies in it:
 
     mkvirtualenv websocket_demo
     pip install -U pyramid gevent-socketio circus chaussette
 
-Next there's one thing we need to modify in the simple_pyramid_chat project, in the `serve.py`, move the line outside of the `if` condition so it looks like:
+Next there's one thing we need to modify in the `simple_pyramid_chat` project, in the `serve.py`, move the line outside of the `if` condition so it looks like:
 
     ...
     
@@ -50,7 +65,7 @@ And then we need a `circus.ini` file which you should be familiar if you've been
     copy_path = True
     
     [env:socketio]
-    PYTHONPATH = /var/www/simple_pyramid_chat
+    PYTHONPATH = /path/to/simple_pyramid_chat
     
     [socket:socketio]
     host = 127.0.0.1
@@ -58,7 +73,7 @@ And then we need a `circus.ini` file which you should be familiar if you've been
 
 Everything should be familiar except that this time we're using `socketio` as our backend for Chaussette and we have a new configuration `singleton` which just means this watcher will have at most 1 process.
 
-We can run this now by running `circusd /var/www/simple_pyramid_chat/circus.ini` and we'll see that the app is being served and the chat is working (You need to open two different browsers if you're testing by yourself).
+We can run this now by running `circusd /path/to/simple_pyramid_chat/circus.ini` and we'll see that the app is being served and the chat is working (You need to open two different browsers if you're testing by yourself).
 
 Then we need to tell Nginx to forward all incoming request to Circus, as of Nginx 1.3.13, Nginx now supports [proxying WebSocket](http://nginx.org/en/docs/http/websocket.html) requests. And here's the Nginx config that we're going to use:
 

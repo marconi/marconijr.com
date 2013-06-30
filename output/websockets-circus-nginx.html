@@ -53,14 +53,32 @@
 <h3>Node</h3>
 <p>And then there's <a href="http://nodejs.org/">Node</a>, the Javascript framework from where Socket.IO was originally built for. For devs with JS stack, its an easy deicision although there are other variants of a similar shim in the JS world too.</p>
 <p>For this post we will concentrate on gevent-socketio, and then Node soon. In the gevent-socketio github repo, there's an example project called <a href="https://github.com/abourget/gevent-socketio/tree/master/examples/simple_pyramid_chat">simple_pyramid_chat</a> we will be using it instead of building our own from ground up.</p>
-<p>First thing is first, lets install all the required dependencies:</p>
+<p>First thing is first, lets install all the required dependencies but this time we're going to use <a href="http://www.virtualenv.org/en/latest/">virtualenv</a> and <a href="https://bitbucket.org/dhellmann/virtualenvwrapper">virtualenvwrapper</a>:</p>
+<table class="codehilitetable"><tr><td class="linenos"><div class="linenodiv"><pre>1</pre></div></td><td class="code"><div class="codehilite"><pre><span class="n">pip</span> <span class="n">install</span> <span class="o">-</span><span class="n">U</span> <span class="n">virtualenv</span> <span class="n">virtualenvwrapper</span>
+</pre></div>
+</td></tr></table>
+
+<p>virtualenv is a tool that lets you create a sandbox environment for your Python application so it doesn't messed up your system wide installation, and virtualenvwrapper is just a bunch of shell commands that wraps around virtualenv commands and offer more abstraction.</p>
+<p>once installed, we need a bit of configuration for those two. Add the following lines to your <code>.profile</code> or <code>.zshrc</code> if you're using <a href="https://github.com/robbyrussell/oh-my-zsh">zshell</a>:</p>
+<table class="codehilitetable"><tr><td class="linenos"><div class="linenodiv"><pre>1
+2</pre></div></td><td class="code"><div class="codehilite"><pre><span class="n">export</span> <span class="n">WORKON_HOME</span><span class="p">=</span><span class="o">~/</span><span class="n">Envs</span>
+<span class="n">source</span> <span class="o">/</span><span class="n">usr</span><span class="o">/</span><span class="n">local</span><span class="o">/</span><span class="n">bin</span><span class="o">/</span><span class="n">virtualenvwrapper</span><span class="p">.</span><span class="n">sh</span>
+</pre></div>
+</td></tr></table>
+
+<p>you need to make sure that $WORKON_HOME exists:</p>
+<table class="codehilitetable"><tr><td class="linenos"><div class="linenodiv"><pre>1</pre></div></td><td class="code"><div class="codehilite"><pre><span class="n">mkdir</span> <span class="o">~/</span><span class="n">Envs</span>
+</pre></div>
+</td></tr></table>
+
+<p>and then reload your terminal by running <code>. ~/.profile</code> or <code>. ~/.zshrc</code>, and then finally create the virtualenv and install the dependencies in it:</p>
 <table class="codehilitetable"><tr><td class="linenos"><div class="linenodiv"><pre>1
 2</pre></div></td><td class="code"><div class="codehilite"><pre><span class="n">mkvirtualenv</span> <span class="n">websocket_demo</span>
 <span class="n">pip</span> <span class="n">install</span> <span class="o">-</span><span class="n">U</span> <span class="n">pyramid</span> <span class="n">gevent</span><span class="o">-</span><span class="n">socketio</span> <span class="n">circus</span> <span class="n">chaussette</span>
 </pre></div>
 </td></tr></table>
 
-<p>Next there's one thing we need to modify in the simple_pyramid_chat project, in the <code>serve.py</code>, move the line outside of the <code>if</code> condition so it looks like:</p>
+<p>Next there's one thing we need to modify in the <code>simple_pyramid_chat</code> project, in the <code>serve.py</code>, move the line outside of the <code>if</code> condition so it looks like:</p>
 <table class="codehilitetable"><tr><td class="linenos"><div class="linenodiv"><pre>1
 2
 3
@@ -107,7 +125,7 @@
 <span class="na">copy_path</span> <span class="o">=</span> <span class="s">True</span>
 
 <span class="k">[env:socketio]</span>
-<span class="na">PYTHONPATH</span> <span class="o">=</span> <span class="s">/var/www/simple_pyramid_chat</span>
+<span class="na">PYTHONPATH</span> <span class="o">=</span> <span class="s">/path/to/simple_pyramid_chat</span>
 
 <span class="k">[socket:socketio]</span>
 <span class="na">host</span> <span class="o">=</span> <span class="s">127.0.0.1</span>
@@ -116,7 +134,7 @@
 </td></tr></table>
 
 <p>Everything should be familiar except that this time we're using <code>socketio</code> as our backend for Chaussette and we have a new configuration <code>singleton</code> which just means this watcher will have at most 1 process.</p>
-<p>We can run this now by running <code>circusd /var/www/simple_pyramid_chat/circus.ini</code> and we'll see that the app is being served and the chat is working (You need to open two different browsers if you're testing by yourself).</p>
+<p>We can run this now by running <code>circusd /path/to/simple_pyramid_chat/circus.ini</code> and we'll see that the app is being served and the chat is working (You need to open two different browsers if you're testing by yourself).</p>
 <p>Then we need to tell Nginx to forward all incoming request to Circus, as of Nginx 1.3.13, Nginx now supports <a href="http://nginx.org/en/docs/http/websocket.html">proxying WebSocket</a> requests. And here's the Nginx config that we're going to use:</p>
 <table class="codehilitetable"><tr><td class="linenos"><div class="linenodiv"><pre> 1
  2
