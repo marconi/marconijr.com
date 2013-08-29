@@ -3,7 +3,7 @@ PELICANOPTS=
 
 BASEDIR=$(CURDIR)
 INPUTDIR=$(BASEDIR)/content
-OUTPUTDIR=$(BASEDIR)/output
+OUTPUTDIR=$(BASEDIR)/blog
 CONFFILE=$(BASEDIR)/pelicanconf.py
 PUBLISHCONF=$(BASEDIR)/publishconf.py
 
@@ -11,10 +11,10 @@ FTP_HOST=localhost
 FTP_USER=anonymous
 FTP_TARGET_DIR=/
 
-SSH_HOST=marconijr.webfactional.com
+SSH_HOST=marconijr.com
 SSH_PORT=22
-SSH_USER=marconijr
-SSH_TARGET_DIR=/home/marconijr/marconijr_blog
+SSH_USER=marconi
+SSH_TARGET_DIR=/home/marconi
 
 DROPBOX_DIR=~/Dropbox/Public/
 
